@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 def shop(request):
      context = {}
-     return render(request, 'shop/main.html', context)
+     return render(request, 'shop/shop.html', context)
 
 def cart(request):
      context = {}
