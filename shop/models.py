@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import os
 
 class Customer(models.Model):
 	user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
@@ -14,11 +15,28 @@ class Product(models.Model):
 	price = models.FloatField()
 	digital = models.BooleanField(default=False,null=True, blank=True)
 	image = models.ImageField(null=True, blank=True)
+	description = models.TextField(null=True, blank=True)
+	main_image = models.ForeignKey(
+		'ProductImage', null=True, blank=True, on_delete=models.SET_NULL, related_name='main_image_for'
+	)
 
 	def __str__(self):
 		return self.name
-	
 
+class ProductImage(models.Model):
+	product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
+	image = models.ImageField(null=True, blank=True)
+
+	def save(self, *args, **kwargs):
+		if self.image and not self.image.name.startswith(f"{self.product.name}_"):
+			image_count = self.product.images.count() + 1
+			extension = os.path.splitext(self.image.name)[1]
+			self.image.name = f"{self.product.name}_{image_count}{extension}"
+		super().save(*args, **kwargs)
+
+	def __str__(self):
+		image_count = list(self.product.images.all()).index(self) + 1
+		return f"{self.product.name} - Image {image_count}"
 
 class Order(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
@@ -40,6 +58,15 @@ class Order(models.Model):
 		orderitems = self.orderitem_set.all()
 		total = sum([item.quantity for item in orderitems])
 		return total 
+	
+	@property
+	def shipping(self):
+		shipping = False
+		orderitems = self.orderitem_set.all()
+		for i in orderitems:
+			if i.product.digital == False:
+				shipping = True
+		return shipping
 
 class OrderItem(models.Model):
 	product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
