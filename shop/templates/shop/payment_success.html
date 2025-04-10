@@ -6,7 +6,7 @@
     <hr>
     <p>Thank you for your purchase, {{ customer.name }}!</p>
     <p><strong>Order ID:</strong> {{ order.id }}</p>
-    <p><strong>Total Amount:</strong> ${{ order.get_cart_total|floatformat:2 }}</p>
+    <p><strong>Total Amount:</strong> ₴{{ order.get_cart_total|floatformat:2 }}</p>
     <p><strong>Shipping Address:</strong></p>
     <ul>
         {% if shipping_address %}
