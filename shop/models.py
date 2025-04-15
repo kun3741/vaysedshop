@@ -43,9 +43,11 @@ class Order(models.Model):
 	date_ordered = models.DateTimeField(auto_now_add=True)
 	complete = models.BooleanField(default=False)
 	transaction_id = models.CharField(max_length=100, null=True)
+	monobank_invoice_id = models.CharField(max_length=100, null=True, blank=True, unique=True)
 
 	def __str__(self):
-		return str(self.id)
+		return f"Order {self.id} (Inv: {self.monobank_invoice_id or 'N/A'})"
+
 
 	@property
 	def get_cart_total(self):
@@ -91,3 +93,4 @@ class ShippingAddress(models.Model):
 
 	def __str__(self):
 		return self.address
+	

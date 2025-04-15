@@ -137,3 +137,8 @@ MEDIA_URL = '/images/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+MONOBANK_API_TOKEN = os.environ.get('MONOBANK_API_TOKEN', 'ur8zC5CFjp7nRvHpIy7js1qr1N67DEeWRtOLNgxhSjss')
+
+SITE_BASE_URL = '127.0.0.1'
