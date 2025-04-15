@@ -1,0 +1,86 @@
+{% extends 'shop/main.html' %}
+{% load static %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 offset-lg-1">
+        <div class="box-element">
+            <h2 class="text-center mb-4">{{ message }}</h2>
+            <hr>
+
+            {% if error_message %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error_message }}
+                    {% if not order %}
+                    <p>If you believe payment was successful, please wait a few minutes or contact support.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if order %}
+                <p class="text-center">Your order <strong>#{{ order.id }}</strong> is being processed.</p>
+                <hr>
+                <div class="row">
+                    <div class="col-md-7">
+                        <h5>Order Contents:</h5>
+                        {% for item in items %}
+                        <div class="cart-row" style="display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <div style="flex: 0 0 60px; margin-right: 10px;">
+                                <img class="row-image" src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            </div>
+                            <div style="flex-grow: 1;">{{ item.product.name }}</div>
+                            <div style="flex: 0 0 70px; text-align: center;">x {{ item.quantity }}</div>
+                            <div style="flex: 0 0 100px; text-align: right;"><strong>₴ {{ item.get_total|floatformat:2 }}</strong></div>
+                        </div>
+                        {% empty %}
+                        <p>Could not load order items.</p>
+                        {% endfor %}
+                        <div class="text-right mt-3">
+                             <h4>Total: ₴ {{ order.get_cart_total|floatformat:2 }}</h4>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        {% if shipping_address %}
+                            <h5>Shipping Details:</h5>
+                            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                                <p>
+                                    <strong>Recipient:</strong> {{ order.customer.name|default:"N/A" }}<br>
+                                    <strong>Address:</strong> {{ shipping_address.address }}<br>
+                                    {{ shipping_address.city }}, {{ shipping_address.state }}, {{ shipping_address.zipcode }}<br>
+                                    {% if order.customer.email %}
+                                        <strong>Email:</strong> {{ order.customer.email }}<br>
+                                        <strong>Phone:</strong> {{ order.customer.phone|default:"N/A" }}<br>
+                                        {% endif %}
+                                </p>
+                            </div>
+                            <p class="mt-2"><small>Please verify your shipping details.</small></p>
+                        {% elif order.customer %}
+                             <h5>Contact Details:</h5>
+                             <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                                <p>
+                                    <strong>Customer:</strong> {{ order.customer.name|default:"N/A" }}<br>
+                                    {% if order.customer.email %}
+                                        <strong>Email:</strong> {{ order.customer.email }}<br>
+                                        <strong>Phone:</strong> {{ order.customer.phone|default:"N/A" }}<br>
+                                     {% endif %}
+                                </p>
+                             </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            {% elif not error_message %}
+                 <p class="text-center">Could not display order details. Please contact support.</p>
+            {% endif %}
+
+            <hr>
+            <div class="text-center mt-4">
+                <a href="{% url 'shop' %}" class="btn btn-primary">Continue Shopping</a>
+                {% if request.user.is_authenticated %}
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,128 +1,173 @@
 {% extends 'shop/main.html' %}
 {% load static %}
 {% block content %}
-<div class="row" style="display: flex; justify-content: space-between;">
+<div class="row" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
     <div class="col-lg-6">
         <div class="box-element" id="form-wrapper">
-            <form id="form">
-                <div id="user-info">
+            <form id="checkout-form" method="POST">
+                 {% csrf_token %}
+                <div id="user-info" {% if user_authenticated %}class="hidden"{% endif %}>
+                    <h5>Contact Information</h5>
                     <div class="form-field">
-                        <input required class="form-control" type="text" name="first_name" placeholder="First Name">
+                        <input required class="form-control" type="text" name="name" placeholder="Full Name *">
                     </div>
                     <div class="form-field">
-                        <input required class="form-control" type="text" name="last_name" placeholder="Last Name">
+                        <input class="form-control" type="email" name="email" placeholder="Email (Optional)">
+                    </div>
+                     <div class="form-field">
+                        <input required class="form-control" type="tel" name="phone" placeholder="Phone Number *">
+                    </div>
+                </div>
+
+                <div id="shipping-info" {% if not shipping %}class="hidden"{% endif %}>
+                    <hr>
+                    <h5>Shipping Address</h5>
+                     <div class="form-field">
+                        <input {% if shipping %}required{% endif %} class="form-control" type="text" name="address" placeholder="Address (Street, House) *">
                     </div>
                     <div class="form-field">
-                        <input required class="form-control" type="tel" name="phone" placeholder="Phone Number">
+                        <input {% if shipping %}required{% endif %} class="form-control" type="text" name="city" placeholder="City *">
                     </div>
                     <div class="form-field">
-                        <input required class="form-control" type="email" name="email" placeholder="Email">
+                        <input {% if shipping %}required{% endif %} class="form-control" type="text" name="state" placeholder="State / Region *">
                     </div>
                     <div class="form-field">
-                        <input required class="form-control" type="text" name="city" placeholder="City">
+                        <input {% if shipping %}required{% endif %} class="form-control" type="text" name="zipcode" placeholder="Zip Code *">
                     </div>
                 </div>
                 <hr>
-                <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue">
+                <input id="form-button" class="btn btn-success btn-block" type="submit" value="Confirm Details">
             </form>
         </div>
-        
-        <br>
 
+        <br>
         <div class="box-element hidden" id="payment-info">
-            <button id="make-payment" class="btn-payment">
+            <p>Your details are accepted. Click the button below to proceed to Monobank payment.</p>
+            <button id="make-payment-btn" class="btn-payment" aria-label="Pay with Monobank">
                 <img src="{% static 'images/plata.png' %}" alt="Pay with Monobank">
             </button>
+             <div id="payment-error" style="color: red; margin-top: 10px;"></div>
         </div>
-
     </div>
 
     <div class="col-lg-6">
         <div class="box-element">
             <a class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Back to Cart</a>
             <hr>
-            <h3>Order Summary</h3>
+            <h3>Your Order</h3>
             <hr>
             {% for item in items %}
             <div class="cart-row">
-                <div style="flex:2"><img class="row-image" src="{{item.product.image.url}}" alt="{{item.product.name}}"></div>
+                <div style="flex:1"><img class="row-image" src="{{item.product.image.url}}" alt="{{item.product.name}}"></div>
                 <div style="flex:2"><p>{{item.product.name}}</p></div>
                 <div style="flex:1"><p>₴{{item.product.price|floatformat:2}}</p></div>
-                <div style="flex:1"><p>x{{item.quantity}}</p></div>
+                <div style="flex:1"><p>x {{item.quantity}}</p></div>
+                 <div style="flex:1; text-align: right;"><p>₴ {{item.get_total|floatformat:2}}</p></div>
             </div>
             {% endfor %}
+            <hr>
             <h5>Items: {{order.get_cart_items}}</h5>
-            <h5>Total: ₴{{order.get_cart_total|floatformat:2}}</h5>
+            <h5>Total: ₴ {{order.get_cart_total|floatformat:2}}</h5>
         </div>
     </div>
 </div>
 
+{{ user_authenticated|json_script:"user_auth_status" }}
+{{ shipping|json_script:"shipping_status" }}
+
 <script type="text/javascript">
-    var shipping = '{{order.shipping}}';
-    var total = '{{order.get_cart_total|floatformat:2}}';
+    const userIsAuthenticated = JSON.parse(document.getElementById('user_auth_status').textContent);
+    const shippingRequired = JSON.parse(document.getElementById('shipping_status').textContent);
 
-    if (shipping == 'False'){
-         document.getElementById('shipping-info').innerHTML = '';
-    }
 
-    var form = document.getElementById('form');
-    form.addEventListener('submit', function(e){
+    console.log('User Authenticated:', userIsAuthenticated);
+    console.log('Shipping Required:', shippingRequired);
+    console.log('CSRF Token (Global):', csrftoken);
+
+    const checkoutForm = document.getElementById('checkout-form');
+    const formWrapper = document.getElementById('form-wrapper');
+    const paymentInfoDiv = document.getElementById('payment-info');
+    const makePaymentButton = document.getElementById('make-payment-btn');
+    const paymentErrorDiv = document.getElementById('payment-error');
+
+    checkoutForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        console.log('Form Submitted...');
-        document.getElementById('form-button').classList.add("hidden");
-        document.getElementById('payment-info').classList.remove("hidden");
+        console.log('Checkout form submitted...');
+        formWrapper.classList.add('hidden');
+        paymentInfoDiv.classList.remove('hidden');
+        paymentErrorDiv.textContent = '';
     });
 
-    document.getElementById('make-payment').addEventListener('click', function () {
-        fetch("{% url 'checkout' %}", {
+    makePaymentButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Monobank payment button clicked');
+        paymentErrorDiv.textContent = '';
+        makePaymentButton.disabled = true;
+
+        const formData = new FormData(checkoutForm);
+        let userInfo = {};
+        let shippingInfo = {};
+
+        if (!userIsAuthenticated) {
+            userInfo = {
+                name: formData.get('name'),
+                email: formData.get('email') || null,
+                phone: formData.get('phone'),
+            };
+        }
+
+        if (shippingRequired) {
+            shippingInfo = {
+                address: formData.get('address'),
+                city: formData.get('city'),
+                state: formData.get('state'),
+                zipcode: formData.get('zipcode'),
+            };
+        }
+
+        console.log('User Info:', userInfo);
+        console.log('Shipping Info:', shippingInfo);
+
+        const url = "{% url 'initiate_payment' %}";
+        fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrftoken,
             },
-            body: JSON.stringify({})
+            body: JSON.stringify({
+                'user': userInfo,
+                'shipping': shippingInfo
+            }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                }).catch(() => {
+                     throw new Error(`HTTP error! status: ${response.status}`);
+                });
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.error) {
-                alert("Payment creation failed: " + data.error);
+            console.log('Success:', data);
+            if (data.pageUrl) {
+                console.log('Redirecting to Monobank payment page:', data.pageUrl);
+                window.location.href = data.pageUrl;
             } else {
-                window.location.href = data['pageUrl'];
+                console.error('Error: No pageUrl received from backend.');
+                paymentErrorDiv.textContent = 'Failed to get payment page URL. Please try again later.';
+                makePaymentButton.disabled = false;
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch((error) => {
+            console.error('Error initiating payment:', error);
+            paymentErrorDiv.textContent = `Payment initiation error: ${error.message}. Please check your details and try again.`;
+            makePaymentButton.disabled = false;
+        });
     });
 
-    function submitFormData(){
-        console.log('Payment button clicked');
 
-        var userFormData = {
-            'name': null,
-            'email': null,
-            'total': total,
-        };
-
-        var shippingInfo = {
-            'address': null,
-            'city': null,
-            'state': null,
-            'zipcode': null,
-        };
-
-        if (shipping != 'False'){
-            shippingInfo.address = form.address.value;
-            shippingInfo.city = form.city.value;
-            shippingInfo.state = form.state.value;
-            shippingInfo.zipcode = form.zipcode.value;
-        }
-
-        if (user == 'AnonymousUser'){
-            userFormData.name = form.name.value;
-            userFormData.email = form.email.value;
-        }
-
-        console.log('Shipping Info:', shippingInfo);
-        console.log('User Info:', userFormData);
-    }
 </script>
 {% endblock content %}
