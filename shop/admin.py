@@ -6,7 +6,7 @@ from .models import Customer, Product, Order, OrderItem, ShippingAddress, Produc
 
 class ShippingAddressInline(admin.StackedInline):
     model = ShippingAddress
-    fields = ('customer', 'address', 'city', 'state', 'zipcode')
+    fields = ('customer', 'phone', 'address', 'city', 'state', 'zipcode')
     readonly_fields = ('customer',)
     extra = 0
     max_num = 1
@@ -66,8 +66,8 @@ class OrderAdmin(admin.ModelAdmin):
 
 
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'email', 'user_link')
-    search_fields = ('name', 'email', 'user__username')
+    list_display = ('id', 'name', 'phone', 'email', 'user_link')
+    search_fields = ('name', 'phone', 'email', 'user__username')
     list_filter = ('user',)
     readonly_fields = ('user',)
     inlines = [OrderInline]

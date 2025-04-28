@@ -5,7 +5,8 @@ import os
 class Customer(models.Model):
 	user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
 	name = models.CharField(max_length=200, null=True)
-	email = models.CharField(max_length=200)
+	email = models.CharField(max_length=200, null=True, blank=True)
+	phone = models.CharField(max_length=20, null=True)
 
 	def __str__(self):
 		return self.name
@@ -85,6 +86,7 @@ class OrderItem(models.Model):
 class ShippingAddress(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
 	order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+	phone = models.CharField(max_length=20, null=True)
 	address = models.CharField(max_length=200, null=False)
 	city = models.CharField(max_length=200, null=False)
 	state = models.CharField(max_length=200, null=False)

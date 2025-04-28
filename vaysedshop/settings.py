@@ -27,12 +27,13 @@ SECRET_KEY = 'django-insecure-9nl7h1f@_9)74-&(cij5$a63^91qkv*+u_4zl!5r^)s8agn@#&
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '8b92-46-219-228-146.ngrok-free.app',
+    'localhost',
     '127.0.0.1',
+    '8414-46-219-228-49.ngrok-free.app',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8b92-46-219-228-146.ngrok-free.app',
+    'https://8414-46-219-228-49.ngrok-free.app',
 ]
 
 # Application definition 
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -130,6 +132,9 @@ STATICFILES_DIRS = [
     
 ]
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 MEDIA_URL = '/images/'
 
@@ -141,4 +146,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MONOBANK_API_TOKEN = os.environ.get('MONOBANK_API_TOKEN', 'ur8zC5CFjp7nRvHpIy7js1qr1N67DEeWRtOLNgxhSjss')
 
-SITE_BASE_URL = '127.0.0.1'

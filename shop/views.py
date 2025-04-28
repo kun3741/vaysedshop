@@ -111,9 +111,10 @@ def initiate_monobank_payment(request):
 
         customer_identifier = guest_email if guest_email else f"guest_{guest_phone}_{uuid.uuid4()}"
 
-        customer, created = Customer.objects.get_or_create(email=customer_identifier)
-        customer.name = guest_name
-        customer.save()
+        customer, created = Customer.objects.update_or_create(
+            email=customer_identifier, 
+            defaults={'name': guest_name, 'phone': guest_phone}
+        )
 
         order = Order.objects.create(customer=customer, complete=False)
         for item_data in items:
@@ -128,6 +129,7 @@ def initiate_monobank_payment(request):
             customer=customer,
             order=order,
             defaults={
+                'phone': shipping_info.get('guest_phone', ''),
                 'address': shipping_info.get('address', ''),
                 'city': shipping_info.get('city', ''),
                 'state': shipping_info.get('state', ''),
