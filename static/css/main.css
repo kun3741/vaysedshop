@@ -486,13 +486,14 @@ h1, h2, h3, h4, h5, h6 {
         padding: 5px;
     }
     .col-lg-4 {
-        flex-basis: calc(100% - 16px);
-        max-width: calc(100% - 16px);
+        flex-basis: calc(100% - 20px);
+        max-width: calc(100% - 20px);
         min-width: unset;
-        margin: 8px auto;
+        margin: 10px auto;
     }
      .thumbnail {
-        height: 280px;
+        height: 220px;
+        object-fit: cover;
     }
 
     .product-info-section h2 {
@@ -506,31 +507,79 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .cart-row {
-        position: relative;
-        padding-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 10px 0;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        gap: 8px 10px;
     }
-     .cart-row > div {
-        flex-basis: auto;
-        width: 100%;
+    
+    .cart-row > div {
+        position: static;
+        transform: none;
+        width: auto;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        text-align: left;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .cart-row > div:nth-child(1) {
+        flex: 0 0 60px;
         justify-content: center;
-        margin-bottom: 5px;
     }
-     .cart-row > div:nth-child(1) {
-         width: 70px; flex-grow: 0; margin-right: 10px;
-     }
-     .cart-row > div:nth-child(2) {
-         width: calc(100% - 80px); flex-grow: 1; justify-content: flex-start;
-     }
-     .cart-row > div:nth-child(3),
-     .cart-row > div:nth-child(4),
-     .cart-row > div:nth-child(5) {
-         width: auto;
-         position: absolute;
-         bottom: 5px;
-     }
-      .cart-row > div:nth-child(3) { left: 80px; }
-      .cart-row > div:nth-child(4) { left: 50%; transform: translateX(-50%); }
-      .cart-row > div:nth-child(5) { right: 10px; }
+    .cart-row > div:nth-child(1) img.row-image {
+       width: 55px;
+       height: 55px;
+    }
+    
+    .cart-row > div:nth-child(2) {
+        flex: 1 1 calc(100% - 75px);
+        justify-content: flex-start;
+        padding-left: 5px;
+    }
+    
+    .cart-row > div:nth-child(3) {
+        flex: 1 1 35%;
+        justify-content: center;
+        font-weight: bold;
+        order: 1;
+        padding-top: 5px;
+    }
+    
+    .cart-row > div:nth-child(4) {
+        flex: 1 1 30%;
+        justify-content: center;
+        order: 2;
+        padding-top: 5px;
+    }
+    .cart-row > div:nth-child(4) .quantity {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .cart-row > div:nth-child(4) p.quantity {
+        padding: 0 8px;
+    }
+    .cart-row > div:nth-child(4) .chg-quantity {
+       width: 18px;
+       height: 18px;
+    }
+    
+    
+    .cart-row > div:nth-child(5) {
+        flex: 1 1 30%;
+        justify-content: flex-end;
+        font-weight: bold;
+        order: 3;
+        padding-top: 5px;
+    }
+    
 
     .navbar .form-inline .btn {
          margin-right: 5px;
