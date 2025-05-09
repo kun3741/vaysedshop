@@ -129,7 +129,7 @@ def initiate_monobank_payment(request):
             customer=customer,
             order=order,
             defaults={
-                'phone': shipping_info.get('guest_phone', ''),
+                'phone': shipping_info.get('phone', ''),
                 'address': shipping_info.get('address', ''),
                 'city': shipping_info.get('city', ''),
                 'state': shipping_info.get('state', ''),
